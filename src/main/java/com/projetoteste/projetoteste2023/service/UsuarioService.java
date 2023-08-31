@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.projetoteste.projetoteste2023.entity.Anotacao;
 import com.projetoteste.projetoteste2023.entity.Autorizacao;
 import com.projetoteste.projetoteste2023.entity.Usuario;
+import com.projetoteste.projetoteste2023.repository.AnotacaoRepository;
 import com.projetoteste.projetoteste2023.repository.AutorizacaoRepository;
 import com.projetoteste.projetoteste2023.repository.UsuarioRepository;
 
@@ -22,6 +24,9 @@ public class UsuarioService {
     private UsuarioRepository usuarioRepo;
     @Autowired
     private AutorizacaoRepository autorizacaorep;
+    @Autowired
+    private AnotacaoRepository anotacaorep;
+
     // Funções
     public Autorizacao buscarPorAutorizacaoId(Long id) {
         Optional<Autorizacao> autorizacaoOp = autorizacaorep.findById(id);
@@ -53,7 +58,15 @@ public class UsuarioService {
             }
             usuario.setAutorizacoes(autorizacoes);
         }
-        return usuarioRepo.save(usuario);
+        usuario =  usuarioRepo.save(usuario);
+        Set<Anotacao> anotacoes = usuario.getAnotacoes();
+        usuario.setAnotacoes(new HashSet<Anotacao>());
+
+        for(Anotacao anotacao: anotacoes){
+            anotacao.setUsuario(usuario);
+            anotacaorep.save(anotacao);
+        }
+        return usuario;
     }
 
     public List<Usuario> buscarTodos() {
